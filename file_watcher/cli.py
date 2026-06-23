@@ -1,6 +1,7 @@
 import argparse
 
 from file_watcher.contract import resolve_watch_config
+from file_watcher.event_builder import build_scan_report
 from file_watcher.watcher import scan_inbox
 
 
@@ -12,6 +13,15 @@ def print_watch_result(result):
     print(f"Inbox: {result.inbox_dir}")
     print(f"Workflow: {result.workflow_path}")
     print(f"Events: {len(result.events)}")
+
+    report = build_scan_report(result)
+
+    print(
+        "Summary: "
+        f"detected={report.detected_events}, "
+        f"ignored={report.ignored_events}, "
+        f"unsupported={report.unsupported_events}"
+    )
 
     if result.events:
         print()

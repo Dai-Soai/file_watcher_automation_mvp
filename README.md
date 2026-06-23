@@ -4,7 +4,7 @@ A lightweight folder watcher automation utility for triggering RADAR document wo
 
 ## Current Status
 
-M3 File Detection Layer.
+M4 Event Builder.
 
 ## Purpose
 
@@ -29,6 +29,11 @@ It will watch an inbox folder, detect new files, and trigger workflow automation
 - File size metadata
 - Modified time metadata
 - Event reason field
+- Event-to-dict serialization
+- Scan report builder
+- Event status counters
+- JSON-ready scan report payload
+- CLI scan summary
 
 ## Installation
 
@@ -63,7 +68,7 @@ file_watcher_automation_mvp/
 - [x] M1 Bootstrap
 - [x] M2 Watch Contract
 - [x] M3 File Detection Layer
-- [] M4 Event Builder
+- [x] M4 Event Builder
 - [] M5 Workflow Trigger Executor
 - [] M6 Processed / Failed Archive
 - [] M7 JSON Event Log

@@ -32,6 +32,7 @@ def test_print_watch_result(capsys):
     assert "Inbox: data/inbox" in captured.out
     assert "Workflow: workflows/sample.workflow.json" in captured.out
     assert "Events: 1" in captured.out
+    assert "Summary: detected=1, ignored=0, unsupported=0" in captured.out
     assert "sample.txt" in captured.out
     assert "text" in captured.out
     assert "size=42" in captured.out
