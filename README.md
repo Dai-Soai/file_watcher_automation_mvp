@@ -4,7 +4,7 @@ A lightweight folder watcher automation utility for triggering RADAR document wo
 
 ## Current Status
 
-M7 JSON Event Log.
+M8 CLI Watch Options.
 
 ## Purpose
 
@@ -45,6 +45,14 @@ It will watch an inbox folder, detect new files, and trigger workflow automation
 - Archive result payload export
 - `--log-json` CLI option
 - Custom log directory with `--log-dir`
+- One-shot watch mode
+- Interval-based watch cycles
+- Maximum cycle limit
+- Reusable watch cycle runner
+- `--once`
+- `--interval`
+- `--max-cycles`
+
 
 ## Installation
 
@@ -93,6 +101,24 @@ watch-run data/inbox \
   --log-json
 ```
 
+### Run Once
+
+```bash
+watch-run data/inbox \
+  --workflow workflows/sample.workflow.json \
+  --once
+```
+
+### Run Multiple Watch Cycles
+
+```bash
+watch-run data/inbox \
+  --workflow workflows/sample.workflow.json \
+  --interval 2 \
+  --max-cycles 3 \
+  --log-json
+```
+
 ## Local Utility Dependencies
 
 ```bash
@@ -132,6 +158,6 @@ file_watcher_automation_mvp/
 - [x] M5 Workflow Trigger Executor
 - [x] M6 Processed / Failed Archive
 - [x] M7 JSON Event Log
-- [] M8 CLI Watch Options
+- [x] M8 CLI Watch Options
 - [] M9 Packaging & README
 - [] M10 v0.1.0 Release

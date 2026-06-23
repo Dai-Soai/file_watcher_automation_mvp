@@ -1,4 +1,5 @@
 import argparse
+import time
 
 from file_watcher.contract import resolve_watch_config
 from file_watcher.event_builder import build_scan_report
@@ -101,8 +102,42 @@ def main():
         help="Directory for JSON event logs",
     )
 
+    parser.add_argument(
+        "--once",
+        action="store_true",
+        help="Run one scan cycle and exit",
+    )
+
+    parser.add_argument(
+        "--interval",
+        type=float,
+        default=0,
+        help="Seconds between watch cycles. 0 means run once.",
+    )
+
+    parser.add_argument(
+        "--max-cycles",
+        type=int,
+        default=1,
+        help="Maximum number of watch cycles to run.",
+    )
+
     args = parser.parse_args()
 
+    max_cycles = 1 if args.once or args.interval <= 0 else args.max_cycles
+
+    for cycle in range(max_cycles):
+        if max_cycles > 1:
+            print()
+            print(f"Watch Cycle: {cycle + 1}/{max_cycles}")
+
+        run_watch_cycle(args)
+
+        if cycle < max_cycles - 1:
+            time.sleep(args.interval)
+
+
+def run_watch_cycle(args):
     config = resolve_watch_config(
         inbox_dir=args.inbox,
         workflow_path=args.workflow,
