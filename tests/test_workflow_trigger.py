@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch
+
 from file_watcher.contract import WatchEvent, WatchScanResult
 from file_watcher.workflow_trigger import (
     build_workflow_command,
@@ -97,3 +99,111 @@ def test_trigger_workflows_for_scan_dry_run_only_detected():
     assert len(results) == 1
     assert results[0].file_name == "sample.txt"
     assert results[0].status == "dry-run"
+
+
+def test_trigger_workflow_for_event_archive_ok(tmp_path):
+    source = tmp_path / "sample.txt"
+    source.write_text("RADAR archive trigger", encoding="utf-8")
+
+    processed = tmp_path / "processed"
+
+    event = WatchEvent(
+        event_id="event-sample.txt",
+        file_path=str(source),
+        file_name="sample.txt",
+        file_type="text",
+        status="detected",
+        workflow_path="workflows/sample.workflow.json",
+        file_size=42,
+        modified_at=123.0,
+        reason="test event",
+    )
+
+    completed = Mock()
+    completed.returncode = 0
+    completed.stdout = "workflow ok"
+    completed.stderr = ""
+
+    with patch("file_watcher.workflow_trigger.subprocess.run", return_value=completed):
+        result = trigger_workflow_for_event(
+            event=event,
+            target="data/inbox",
+            archive=True,
+            processed_dir=str(processed),
+            failed_dir=str(tmp_path / "failed"),
+        )
+
+    assert result.status == "ok"
+    assert result.archive_result is not None
+    assert result.archive_result.status == "archived"
+    assert not source.exists()
+    assert (processed / "sample.txt").exists()
+
+
+def test_trigger_workflow_for_event_archive_failed(tmp_path):
+    source = tmp_path / "sample.txt"
+    source.write_text("RADAR failed archive trigger", encoding="utf-8")
+
+    failed = tmp_path / "failed"
+
+    event = WatchEvent(
+        event_id="event-sample.txt",
+        file_path=str(source),
+        file_name="sample.txt",
+        file_type="text",
+        status="detected",
+        workflow_path="workflows/sample.workflow.json",
+        file_size=42,
+        modified_at=123.0,
+        reason="test event",
+    )
+
+    completed = Mock()
+    completed.returncode = 1
+    completed.stdout = ""
+    completed.stderr = "workflow failed"
+
+    with patch("file_watcher.workflow_trigger.subprocess.run", return_value=completed):
+        result = trigger_workflow_for_event(
+            event=event,
+            target="data/inbox",
+            archive=True,
+            processed_dir=str(tmp_path / "processed"),
+            failed_dir=str(failed),
+        )
+
+    assert result.status == "failed"
+    assert result.archive_result is not None
+    assert result.archive_result.status == "archived"
+    assert not source.exists()
+    assert (failed / "sample.txt").exists()
+
+
+def test_trigger_workflow_for_event_dry_run_does_not_archive(tmp_path):
+    source = tmp_path / "sample.txt"
+    source.write_text("RADAR dry run archive", encoding="utf-8")
+
+    event = WatchEvent(
+        event_id="event-sample.txt",
+        file_path=str(source),
+        file_name="sample.txt",
+        file_type="text",
+        status="detected",
+        workflow_path="workflows/sample.workflow.json",
+        file_size=42,
+        modified_at=123.0,
+        reason="test event",
+    )
+
+    result = trigger_workflow_for_event(
+        event=event,
+        target="data/inbox",
+        dry_run=True,
+        archive=True,
+        processed_dir=str(tmp_path / "processed"),
+        failed_dir=str(tmp_path / "failed"),
+    )
+
+    assert result.status == "dry-run"
+    assert result.archive_result is None
+    assert source.exists()

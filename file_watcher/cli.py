@@ -82,6 +82,12 @@ def main():
         help="Build trigger commands without executing workflow",
     )
 
+    parser.add_argument(
+        "--archive",
+        action="store_true",
+        help="Move successfully triggered files to processed dir and failed files to failed dir",
+    )
+
     args = parser.parse_args()
 
     config = resolve_watch_config(
@@ -99,6 +105,9 @@ def main():
         trigger_results = trigger_workflows_for_scan(
             result,
             dry_run=args.dry_run,
+            archive=args.archive,
+            processed_dir=args.processed_dir,
+            failed_dir=args.failed_dir,
         )
 
         print()
@@ -115,6 +124,11 @@ def main():
             )
             print(f"  command: {' '.join(trigger_result.command)}")
             print(f"  message: {trigger_result.message}")
+
+            if trigger_result.archive_result is not None:
+                archive_result = trigger_result.archive_result
+                print(f"  archive: {archive_result.status}")
+                print(f"  destination: {archive_result.destination_path}")
 
 
 if __name__ == "__main__":
