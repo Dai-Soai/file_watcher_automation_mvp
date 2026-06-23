@@ -4,7 +4,7 @@ A lightweight folder watcher automation utility for triggering RADAR document wo
 
 ## Current Status
 
-Current Status: v0.1.0 Release Candidate
+Current Status: v0.1.0 Release.
 
 ## Purpose
 
@@ -241,7 +241,7 @@ file_watcher_automation_mvp/
 - [x] M7 JSON Event Log
 - [x] M8 CLI Watch Options
 - [x] M9 Packaging & README
-- [] M10 v0.1.0 Release
+- [x] M10 v0.1.0 Release
 
 ## Version
 
@@ -251,4 +251,4 @@ v0.1.0
 
 Status:
 
-Release Candidate
+Release
