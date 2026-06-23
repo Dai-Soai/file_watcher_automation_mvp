@@ -3,6 +3,7 @@ import argparse
 from file_watcher.contract import resolve_watch_config
 from file_watcher.event_builder import build_scan_report
 from file_watcher.watcher import scan_inbox
+from file_watcher.workflow_trigger import trigger_workflows_for_scan
 
 
 def print_watch_result(result):
@@ -69,6 +70,18 @@ def main():
         help="Directory for failed files",
     )
 
+    parser.add_argument(
+        "--trigger",
+        action="store_true",
+        help="Trigger workflow for detected files",
+    )
+
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Build trigger commands without executing workflow",
+    )
+
     args = parser.parse_args()
 
     config = resolve_watch_config(
@@ -81,6 +94,27 @@ def main():
     result = scan_inbox(config)
 
     print_watch_result(result)
+
+    if args.trigger:
+        trigger_results = trigger_workflows_for_scan(
+            result,
+            dry_run=args.dry_run,
+        )
+
+        print()
+        print("Workflow Triggers:")
+
+        if not trigger_results:
+            print("- No detected files to trigger.")
+
+        for trigger_result in trigger_results:
+            print(
+                f"- [{trigger_result.status}] "
+                f"{trigger_result.file_name} "
+                f"returncode={trigger_result.returncode}"
+            )
+            print(f"  command: {' '.join(trigger_result.command)}")
+            print(f"  message: {trigger_result.message}")
 
 
 if __name__ == "__main__":
