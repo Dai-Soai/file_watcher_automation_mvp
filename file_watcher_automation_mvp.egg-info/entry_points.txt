@@ -1,2 +1,0 @@
-[console_scripts]
-watch-run = file_watcher.cli:main
