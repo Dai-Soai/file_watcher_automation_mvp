@@ -9,3 +9,4 @@ data/failed/*
 !data/inbox/.gitkeep
 !data/processed/.gitkeep
 !data/failed/.gitkeep
+*.egg-info/
