@@ -1,6 +1,8 @@
-from pathlib import Path
-
-from file_watcher.contract import resolve_watch_config
+from file_watcher.contract import (
+    build_watch_event,
+    detect_file_type,
+    resolve_watch_config,
+)
 from file_watcher.watcher import scan_inbox
 
 
@@ -16,7 +18,46 @@ def test_resolve_watch_config():
     assert config.failed_dir == "data/failed"
 
 
-def test_scan_inbox_detects_files(tmp_path):
+def test_detect_file_type_text():
+    assert detect_file_type("sample.txt") == "text"
+    assert detect_file_type("sample.md") == "text"
+
+
+def test_detect_file_type_image():
+    assert detect_file_type("sample.png") == "image"
+    assert detect_file_type("sample.jpg") == "image"
+    assert detect_file_type("sample.jpeg") == "image"
+    assert detect_file_type("sample.webp") == "image"
+
+
+def test_detect_file_type_pdf():
+    assert detect_file_type("sample.pdf") == "pdf"
+
+
+def test_detect_file_type_json():
+    assert detect_file_type("sample.json") == "json"
+
+
+def test_detect_file_type_unknown():
+    assert detect_file_type("sample.unknown") == "unknown"
+    assert detect_file_type("sample") == "unknown"
+
+
+def test_build_watch_event():
+    event = build_watch_event(
+        file_path="data/inbox/sample.txt",
+        workflow_path="workflows/sample.workflow.json",
+    )
+
+    assert event.event_id
+    assert event.file_path == "data/inbox/sample.txt"
+    assert event.file_name == "sample.txt"
+    assert event.file_type == "text"
+    assert event.status == "detected"
+    assert event.workflow_path == "workflows/sample.workflow.json"
+
+
+def test_scan_inbox_detects_events(tmp_path):
     inbox = tmp_path / "inbox"
     inbox.mkdir()
 
@@ -31,9 +72,11 @@ def test_scan_inbox_detects_files(tmp_path):
     result = scan_inbox(config)
 
     assert result.status == "ok"
-    assert len(result.detected_files) == 1
-    assert str(sample_file) in result.detected_files
-    assert "Detected 1 file(s)." in result.message
+    assert len(result.events) == 1
+    assert result.events[0].file_name == "sample.txt"
+    assert result.events[0].file_type == "text"
+    assert result.events[0].status == "detected"
+    assert "Detected 1 file event(s)." in result.message
 
 
 def test_scan_inbox_ignores_gitkeep(tmp_path):
@@ -51,5 +94,5 @@ def test_scan_inbox_ignores_gitkeep(tmp_path):
     result = scan_inbox(config)
 
     assert result.status == "ok"
-    assert result.detected_files == []
-    assert "Detected 0 file(s)." in result.message
+    assert result.events == []
+    assert "Detected 0 file event(s)." in result.message

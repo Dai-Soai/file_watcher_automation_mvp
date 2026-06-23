@@ -1,14 +1,23 @@
 from file_watcher.cli import print_watch_result
-from file_watcher.watcher import WatchResult
+from file_watcher.contract import WatchEvent, WatchScanResult
 
 
 def test_print_watch_result(capsys):
-    result = WatchResult(
+    result = WatchScanResult(
         status="ok",
         inbox_dir="data/inbox",
         workflow_path="workflows/sample.workflow.json",
-        detected_files=["data/inbox/sample.txt"],
-        message="Detected 1 file(s).",
+        events=[
+            WatchEvent(
+                event_id="event-001",
+                file_path="data/inbox/sample.txt",
+                file_name="sample.txt",
+                file_type="text",
+                status="detected",
+                workflow_path="workflows/sample.workflow.json",
+            )
+        ],
+        message="Detected 1 file event(s).",
     )
 
     print_watch_result(result)
@@ -19,5 +28,7 @@ def test_print_watch_result(capsys):
     assert "Status: ok" in captured.out
     assert "Inbox: data/inbox" in captured.out
     assert "Workflow: workflows/sample.workflow.json" in captured.out
-    assert "Detected: 1 file(s)" in captured.out
-    assert "data/inbox/sample.txt" in captured.out
+    assert "Events: 1" in captured.out
+    assert "sample.txt" in captured.out
+    assert "text" in captured.out
+    assert "event-001" in captured.out

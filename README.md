@@ -4,7 +4,7 @@ A lightweight folder watcher automation utility for triggering RADAR document wo
 
 ## Current Status
 
-M1 Bootstrap.
+M2 Watch Contract.
 
 ## Purpose
 
@@ -19,6 +19,10 @@ It will watch an inbox folder, detect new files, and trigger workflow automation
 - Inbox folder scan
 - File detection placeholder
 - Pytest foundation
+- Watch event contract
+- Watch scan result contract
+- File type detection
+- Event ID generation
 
 ## Installation
 
@@ -51,7 +55,7 @@ file_watcher_automation_mvp/
 ## Roadmap
 
 - [x] M1 Bootstrap
-- [] M2 Watch Contract
+- [x] M2 Watch Contract
 - [] M3 File Detection Layer
 - [] M4 Event Builder
 - [] M5 Workflow Trigger Executor

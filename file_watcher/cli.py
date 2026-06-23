@@ -11,13 +11,18 @@ def print_watch_result(result):
     print(f"Status: {result.status}")
     print(f"Inbox: {result.inbox_dir}")
     print(f"Workflow: {result.workflow_path}")
-    print(f"Detected: {len(result.detected_files)} file(s)")
+    print(f"Events: {len(result.events)}")
 
-    if result.detected_files:
+    if result.events:
         print()
-        print("Files:")
-        for file_path in result.detected_files:
-            print(f"- {file_path}")
+        print("Events:")
+        for event in result.events:
+            print(
+                f"- [{event.status}] "
+                f"{event.file_name} "
+                f"({event.file_type}) "
+                f"id={event.event_id}"
+            )
 
     print()
     print(result.message)
