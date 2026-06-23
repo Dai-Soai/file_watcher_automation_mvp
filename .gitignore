@@ -2,6 +2,8 @@
 __pycache__/
 .pytest_cache/
 *.pyc
+*.egg-info/
+
 outputs/
 data/inbox/*
 data/processed/*
@@ -9,4 +11,4 @@ data/failed/*
 !data/inbox/.gitkeep
 !data/processed/.gitkeep
 !data/failed/.gitkeep
-*.egg-info/
+
