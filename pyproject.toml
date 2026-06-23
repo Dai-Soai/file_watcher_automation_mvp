@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "file-watcher-automation-mvp"
+version = "0.1.0"
+description = "File Watcher Automation MVP for triggering RADAR workflows when new files appear."
+requires-python = ">=3.11"
+readme = "README.md"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0"
+]
+
+[tool.setuptools.packages.find]
+include = ["file_watcher*"]
+exclude = ["data*", "outputs*", "tests*", "workflows*"]
+
+[project.scripts]
+watch-run = "file_watcher.cli:main"

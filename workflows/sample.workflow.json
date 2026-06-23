@@ -1,0 +1,6 @@
+{
+  "name": "sample-file-watcher-workflow",
+  "description": "Sample workflow contract path for File Watcher Automation MVP.",
+  "target": "data/inbox",
+  "steps": []
+}
