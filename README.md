@@ -4,7 +4,7 @@ A lightweight folder watcher automation utility for triggering RADAR document wo
 
 ## Current Status
 
-M8 CLI Watch Options.
+Current Status: v0.1.0 Release Candidate
 
 ## Purpose
 
@@ -52,7 +52,9 @@ It will watch an inbox folder, detect new files, and trigger workflow automation
 - `--once`
 - `--interval`
 - `--max-cycles`
-
+- Package build support
+- Wheel distribution support
+- Editable install support
 
 ## Installation
 
@@ -61,10 +63,73 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 ```
+## Build Package
+
+```bash
+pip install build
+rm -rf dist build *.egg-info
+python -m build
+```
+## Install Built Package
+
+```bash
+pip uninstall file-watcher-automation-mvp -y
+pip install dist/*.whl
+watch-run --help
+```
+## For continued development:
+
+pip install -e ".[dev]"
+
+## Testing
+
+```bash
+pytest
+```
+
+## Latest result:
+
+37 passed
+
+## Expected outputs:
+
+file_watcher_automation_mvp-0.1.0-py3-none-any.whl
+file_watcher_automation_mvp-0.1.0.tar.gz
+
+## Generated under:
+
+```text
+dist/
+```
+
+## Release Notes
+
+### v0.1.0
+
+Initial release of File Watcher Automation MVP.
+
+Includes:
+
+- Inbox folder scanning
+- Watch event contract
+- File detection layer
+- Event builder
+- Workflow trigger executor
+- Processed / failed archive
+- JSON event log
+- CLI watch options
+- One-shot mode
+- Interval watch cycles
+- Pytest coverage
 
 ## Usage
 
-watch-run data/inbox --workflow workflows/sample.workflow.json
+### Quick Start
+
+```bash
+watch-run data/inbox \
+  --workflow workflows/sample.workflow.json
+```
 
 ### Trigger Workflow Dry Run
 
@@ -135,19 +200,35 @@ which radar-search
 
 ## Project Structure
 
+```text
 file_watcher_automation_mvp/
 ├── data/
 │   ├── inbox/
 │   ├── processed/
 │   └── failed/
 ├── file_watcher/
+│   ├── __init__.py
+│   ├── archive.py
 │   ├── cli.py
 │   ├── contract.py
-│   └── watcher.py
+│   ├── event_builder.py
+│   ├── event_log.py
+│   ├── watcher.py
+│   └── workflow_trigger.py
 ├── tests/
+│   ├── test_archive.py
+│   ├── test_cli.py
+│   ├── test_event_builder.py
+│   ├── test_event_log.py
+│   ├── test_watch_options.py
+│   ├── test_watcher.py
+│   └── test_workflow_trigger.py
 ├── workflows/
+│   └── sample.workflow.json
 ├── pyproject.toml
-└── README.md
+├── README.md
+└── .gitignore
+```
 
 ## Roadmap
 
@@ -159,5 +240,15 @@ file_watcher_automation_mvp/
 - [x] M6 Processed / Failed Archive
 - [x] M7 JSON Event Log
 - [x] M8 CLI Watch Options
-- [] M9 Packaging & README
+- [x] M9 Packaging & README
 - [] M10 v0.1.0 Release
+
+## Version
+
+Current Version:
+
+v0.1.0
+
+Status:
+
+Release Candidate
