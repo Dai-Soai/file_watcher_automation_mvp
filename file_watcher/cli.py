@@ -2,6 +2,7 @@ import argparse
 
 from file_watcher.contract import resolve_watch_config
 from file_watcher.event_builder import build_scan_report
+from file_watcher.event_log import build_event_log_payload, write_event_log
 from file_watcher.watcher import scan_inbox
 from file_watcher.workflow_trigger import trigger_workflows_for_scan
 
@@ -88,6 +89,18 @@ def main():
         help="Move successfully triggered files to processed dir and failed files to failed dir",
     )
 
+    parser.add_argument(
+        "--log-json",
+        action="store_true",
+        help="Write scan and trigger results to JSON event log",
+    )
+
+    parser.add_argument(
+        "--log-dir",
+        default="outputs/event_logs",
+        help="Directory for JSON event logs",
+    )
+
     args = parser.parse_args()
 
     config = resolve_watch_config(
@@ -100,6 +113,9 @@ def main():
     result = scan_inbox(config)
 
     print_watch_result(result)
+
+    scan_report = build_scan_report(result)
+    trigger_results = []
 
     if args.trigger:
         trigger_results = trigger_workflows_for_scan(
@@ -129,6 +145,20 @@ def main():
                 archive_result = trigger_result.archive_result
                 print(f"  archive: {archive_result.status}")
                 print(f"  destination: {archive_result.destination_path}")
+
+    if args.log_json:
+        payload = build_event_log_payload(
+            scan_report=scan_report,
+            trigger_results=trigger_results,
+        )
+
+        log_path = write_event_log(
+            payload=payload,
+            output_dir=args.log_dir,
+        )
+
+        print()
+        print(f"JSON event log written: {log_path}")
 
 
 if __name__ == "__main__":
