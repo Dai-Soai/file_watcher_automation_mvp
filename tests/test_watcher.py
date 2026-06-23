@@ -1,7 +1,9 @@
 from file_watcher.contract import (
     build_watch_event,
     detect_file_type,
+    is_supported_file_type,
     resolve_watch_config,
+    should_ignore_file,
 )
 from file_watcher.watcher import scan_inbox
 
@@ -43,18 +45,70 @@ def test_detect_file_type_unknown():
     assert detect_file_type("sample") == "unknown"
 
 
-def test_build_watch_event():
+def test_is_supported_file_type():
+    assert is_supported_file_type("text") is True
+    assert is_supported_file_type("image") is True
+    assert is_supported_file_type("pdf") is False
+    assert is_supported_file_type("json") is False
+    assert is_supported_file_type("unknown") is False
+
+
+def test_should_ignore_file():
+    assert should_ignore_file(".gitkeep") is True
+    assert should_ignore_file(".hidden") is True
+    assert should_ignore_file("sample.txt~") is True
+    assert should_ignore_file("sample.tmp") is True
+    assert should_ignore_file("sample.swp") is True
+    assert should_ignore_file("sample.txt") is False
+
+
+def test_build_watch_event_supported_file(tmp_path):
+    sample_file = tmp_path / "sample.txt"
+    sample_file.write_text("RADAR watcher test", encoding="utf-8")
+
     event = build_watch_event(
-        file_path="data/inbox/sample.txt",
+        file_path=str(sample_file),
         workflow_path="workflows/sample.workflow.json",
     )
 
     assert event.event_id
-    assert event.file_path == "data/inbox/sample.txt"
+    assert event.file_path == str(sample_file)
     assert event.file_name == "sample.txt"
     assert event.file_type == "text"
     assert event.status == "detected"
     assert event.workflow_path == "workflows/sample.workflow.json"
+    assert event.file_size > 0
+    assert event.modified_at > 0
+    assert event.reason == "supported file detected"
+
+
+def test_build_watch_event_unsupported_file(tmp_path):
+    sample_file = tmp_path / "sample.pdf"
+    sample_file.write_text("PDF placeholder", encoding="utf-8")
+
+    event = build_watch_event(
+        file_path=str(sample_file),
+        workflow_path="workflows/sample.workflow.json",
+    )
+
+    assert event.file_name == "sample.pdf"
+    assert event.file_type == "pdf"
+    assert event.status == "unsupported"
+    assert event.reason == "unsupported file type: pdf"
+
+
+def test_build_watch_event_ignored_file(tmp_path):
+    sample_file = tmp_path / ".hidden"
+    sample_file.write_text("hidden", encoding="utf-8")
+
+    event = build_watch_event(
+        file_path=str(sample_file),
+        workflow_path="workflows/sample.workflow.json",
+    )
+
+    assert event.file_name == ".hidden"
+    assert event.status == "ignored"
+    assert event.reason == "ignored file pattern"
 
 
 def test_scan_inbox_detects_events(tmp_path):
@@ -76,15 +130,16 @@ def test_scan_inbox_detects_events(tmp_path):
     assert result.events[0].file_name == "sample.txt"
     assert result.events[0].file_type == "text"
     assert result.events[0].status == "detected"
-    assert "Detected 1 file event(s)." in result.message
+    assert "Detected 1 supported file event(s)." in result.message
 
 
-def test_scan_inbox_ignores_gitkeep(tmp_path):
+def test_scan_inbox_marks_ignored_and_unsupported(tmp_path):
     inbox = tmp_path / "inbox"
     inbox.mkdir()
 
-    gitkeep = inbox / ".gitkeep"
-    gitkeep.write_text("", encoding="utf-8")
+    (inbox / ".gitkeep").write_text("", encoding="utf-8")
+    (inbox / "sample.pdf").write_text("PDF placeholder", encoding="utf-8")
+    (inbox / "sample.txt").write_text("text", encoding="utf-8")
 
     config = resolve_watch_config(
         inbox_dir=str(inbox),
@@ -93,6 +148,9 @@ def test_scan_inbox_ignores_gitkeep(tmp_path):
 
     result = scan_inbox(config)
 
-    assert result.status == "ok"
-    assert result.events == []
-    assert "Detected 0 file event(s)." in result.message
+    statuses = {event.file_name: event.status for event in result.events}
+
+    assert statuses[".gitkeep"] == "ignored"
+    assert statuses["sample.pdf"] == "unsupported"
+    assert statuses["sample.txt"] == "detected"
+    assert "Detected 1 supported file event(s)." in result.message

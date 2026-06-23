@@ -15,9 +15,12 @@ def test_print_watch_result(capsys):
                 file_type="text",
                 status="detected",
                 workflow_path="workflows/sample.workflow.json",
+                file_size=42,
+                modified_at=123.0,
+                reason="supported file detected",
             )
         ],
-        message="Detected 1 file event(s).",
+        message="Detected 1 supported file event(s).",
     )
 
     print_watch_result(result)
@@ -31,4 +34,6 @@ def test_print_watch_result(capsys):
     assert "Events: 1" in captured.out
     assert "sample.txt" in captured.out
     assert "text" in captured.out
+    assert "size=42" in captured.out
     assert "event-001" in captured.out
+    assert "supported file detected" in captured.out

@@ -21,8 +21,10 @@ def print_watch_result(result):
                 f"- [{event.status}] "
                 f"{event.file_name} "
                 f"({event.file_type}) "
+                f"size={event.file_size} "
                 f"id={event.event_id}"
             )
+            print(f"  reason: {event.reason}")
 
     print()
     print(result.message)
